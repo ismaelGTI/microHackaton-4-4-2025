@@ -24,8 +24,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y nginx ufw
 
-          - name: Configurar NGINX (dev)
-          run: |
+      - name: Configurar NGINX (dev)
+        run: |
             echo "server {
               listen 80;
               server_name mi-app-dev.com;
