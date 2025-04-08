@@ -49,15 +49,15 @@ jobs:
       
       - name: Desplegar en desarrollo #Despliegue
         env:                                           #Variables de entorno (NO HARDCODEADAS !!)
-          DB_USER: ${{ github.action.secrets.DB_USER_DEV }}
-          DB_PASS: ${{ github.action.secrets.DB_PASS_DEV }}
-          API_KEY: ${{ github.action.secrets.API_KEY_DEV }}
+          DB_USER: ${{ secrets.DB_USER_DEV }}
+          DB_PASS: ${{ secrets.DB_PASS_DEV }}
+          API_KEY: ${{ secrets.API_KEY_DEV }}
         run: |
           hackaton deploy --env=DEV
           hackaton restart app --env=DEV
 
       - name: Valores
         run: |
-          echo " Valor de DB_USER_DEV: ${{ github.action.secrets.DB_USER_DEV }}"
-          echo "Valor de DB_PASS_DEV: ${{ github.action.secrets.DB_PASS_DEV }}"
-          echo "Valor de API_KEY_DEV: ${{ github.action.secrets.API_KEY_DEV }}"
+          echo " Valor de DB_USER_DEV: ${{ secrets.DB_USER_DEV }}"
+          echo "Valor de DB_PASS_DEV: ${{ secrets.DB_PASS_DEV }}"
+          echo "Valor de API_KEY_DEV: ${{ secrets.API_KEY_DEV }}"

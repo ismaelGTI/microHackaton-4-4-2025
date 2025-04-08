@@ -56,9 +56,9 @@ jobs:
       - name: Desplegar en desarrollo
     
         env:
-          DB_USER: ${{ github.action.secrets.DB_USER_PROD}}
-          DB_PASS: ${{ github.action.secrets.DB_PASS_PROD}}
-          API_KEY: ${{ github.action.secrets.API_KEY_PROD}}
+          DB_USER: ${{ secrets.DB_USER_PROD}}
+          DB_PASS: ${{ secrets.DB_PASS_PROD}}
+          API_KEY: ${{ secrets.API_KEY_PROD}}
         run: |
           echo "Entorno: PROD"
           hackaton deploy --env=prod
@@ -67,6 +67,6 @@ jobs:
 
       - name: Valores
         run: |
-          echo "DB_USER_PROD: ${{ github.action.secrets.DB_USER_PROD }}"
-          echo "DB_PASS_PROD: ${{ github.action.secrets.DB_PASS_PROD }}"
-          echo "API_KEY_PROD: ${{ github.action.secrets.API_KEY_PROD }}"
+          echo "DB_USER_PROD: ${{ secrets.DB_USER_PROD }}"
+          echo "DB_PASS_PROD: ${{ secrets.DB_PASS_PROD }}"
+          echo "API_KEY_PROD: ${{ secrets.API_KEY_PROD }}"
