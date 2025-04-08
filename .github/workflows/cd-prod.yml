@@ -2,6 +2,14 @@ name: CD - Producción Continua (Delivery)
 
 on:
   workflow_dispatch:  #Ejecucción manual
+    inputs:
+        environment:
+          description: 'Selecciona el entorno (dev o prod)'
+          required: true
+          default: 'prod'
+          type: choice
+          options:
+          - prod
 
 jobs:
   deploy-prod:
@@ -32,6 +40,7 @@ jobs:
           sudo ufw status  
 
       - name: Configurar NGINX (dev)
+        if: ${{ github.event.inputs.environment == 'prod' }}  # Solo para entorno dev
         run: |
             echo "server {
               listen 80;
@@ -39,19 +48,25 @@ jobs:
               location / {
                 proxy_pass http://localhost:3001;
               }
-            }" | sudo tee /etc/nginx/sites-available/dev
-            sudo ln -s /etc/nginx/sites-available/dev /etc/nginx/sites-enabled/
+            }" | sudo tee /etc/nginx/sites-available/prod
+            sudo ln -s /etc/nginx/sites-available/prod /etc/nginx/sites-enabled/
             sudo nginx -t
             sudo systemctl restart nginx
       
       - name: Desplegar en desarrollo
     
         env:
-          DB_USER: ${{ github.action.secrets.DB_USER_DEV}}
-          DB_PASS: ${{ github.action.secrets.DB_PASS_DEV}}
-          API_KEY: ${{ github.action.secrets.API_KEY_DEV}}
+          DB_USER: ${{ secrets.DB_USER_PROD}}
+          DB_PASS: ${{ secrets.DB_PASS_PROD}}
+          API_KEY: ${{ secrets.API_KEY_PROD}}
         run: |
-          echo "Entorno: DEV"
-          hackaton deploy --env=DEV
-          hackaton restart app --env=DEV
+          echo "Entorno: PROD"
+          hackaton deploy --env=prod
+          hackaton restart app --env=prod
           curl -I http://localhost
+
+      - name: Valores
+        run: |
+          echo "DB_USER_PROD: ${{ secrets.DB_USER_PROD }}"
+          echo "DB_PASS_PROD: ${{ secrets.DB_PASS_PROD }}"
+          echo "API_KEY_PROD: ${{ secrets.API_KEY_PROD }}"
