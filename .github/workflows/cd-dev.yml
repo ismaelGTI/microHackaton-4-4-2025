@@ -1,0 +1,47 @@
+name: CD - Desarrollo Continuo (Development)
+
+on:
+    workflow_dispatch: #Ejecutar manualmente
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+
+    environment: desarrollo #Entorno
+
+    steps:
+
+      - name: Checkout código         #
+        uses: actions/checkout@v2
+        
+      - name: Simular hackaton CLI   #Simulación Dependencias Hackaton
+        run: |
+          echo -e '#!/bin/bash\necho "Simulación de hackaton $@"' | sudo tee /usr/local/bin/hackaton
+          sudo chmod +x /usr/local/bin/hackaton
+
+      - name: Instalar dependencias necesarias
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nginx ufw
+
+          - name: Configurar NGINX (dev)
+          run: |
+            echo "server {
+              listen 80;
+              server_name mi-app-dev.com;
+              location / {
+                proxy_pass http://localhost:3001;
+              }
+            }" | sudo tee /etc/nginx/sites-available/dev
+            sudo ln -s /etc/nginx/sites-available/dev /etc/nginx/sites-enabled/
+            sudo nginx -t
+            sudo systemctl restart nginx
+      
+      - name: Desplegar en desarrollo #Despliegue
+        env:                                           #Variables de entorno (NO HARDCODEADAS !!)
+          DB_USER: ${{ github.action.secrets.DB_USER_DEV }}
+          DB_PASS: ${{ github.action.secrets.DB_PASS_DEV }}
+          API_KEY: ${{ github.action.secrets.API_KEY_DEV }}
+        run: |
+          hackaton deploy --env=DEV
+          hackaton restart app --env=DEV

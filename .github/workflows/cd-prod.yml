@@ -1,0 +1,57 @@
+name: CD - Producción Continua (Delivery)
+
+on:
+  workflow_dispatch:  #Ejecucción manual
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+
+    environment: produccion #Entorno
+    
+    steps:
+
+      - name: Checkout del código   #Clonación del repo
+        uses: actions/checkout@v2
+
+      - name: Simular hackaton CLI  #Simulación Hackaton CLI
+        run: | 
+          echo -e '#!/bin/bash\necho "[SIMULACIÓN] hackaton \$@"' | sudo tee /usr/local/bin/hackaton
+          sudo chmod +x /usr/local/bin/hackaton
+
+      - name: Instalar dependencias necesarias #Configuración dependencias
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nginx ufw curl jq
+      
+      - name: Configurar cortafuegos  #Configuración Firewall
+        run:
+          sudo ufw allow 'OpenSSH'
+          sudo ufw allow 'Nginx Full'
+          sudo ufw --force enable
+          sudo ufw status
+
+      - name: Configurar NGINX (dev)
+        run: |
+            echo "server {
+              listen 80;
+              server_name mi-app-dev.com;
+              location / {
+                proxy_pass http://localhost:3001;
+              }
+            }" | sudo tee /etc/nginx/sites-available/dev
+            sudo ln -s /etc/nginx/sites-available/dev /etc/nginx/sites-enabled/
+            sudo nginx -t
+            sudo systemctl restart nginx
+      
+      - name: Desplegar en desarrollo
+    
+        env:
+          DB_USER: ${{ github.action.secrets.DB_USER_DEV}}
+          DB_PASS: ${{ github.action.secrets.DB_PASS_DEV}}
+          API_KEY: ${{ github.action.secrets.API_KEY_DEV}}
+        run: |
+          echo "Entorno: DEV"
+          hackaton deploy --env=DEV
+          hackaton restart app --env=DEV
+          curl -I http://localhost

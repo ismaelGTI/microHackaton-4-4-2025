@@ -1,0 +1,37 @@
+name: CI pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout código        #Clonación del repo
+        uses: actions/checkout@v3
+
+      - name: Simular hackaton CLI   #Simulación Dependencias Hackaton
+        run: |
+          echo -e '#!/bin/bash\necho "Simulación de hackaton $@"' | sudo tee /usr/local/bin/hackaton
+          sudo chmod +x /usr/local/bin/hackaton
+      
+      - name: Configurar entorno     #Configuración
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y hackaton
+    
+      - name: Construir aplicación   #Construcción
+        run: |
+          echo "Construyendo aplicación..."
+          hackaton run build
+      
+      - name: Ejecutar pruebas       #Pruebas
+        run: |
+          echo "Testing aplicación..."
+          hackaton test
