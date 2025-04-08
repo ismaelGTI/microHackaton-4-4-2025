@@ -26,7 +26,7 @@ jobs:
       
       - name: Configurar cortafuegos  #Configuración Firewall
         run:
-          sudo ufw allow 'OpenSSH'
+          sudo ufw allow OpenSSH
           sudo ufw allow 'Nginx Full'
           sudo ufw --force enable
           sudo ufw status
